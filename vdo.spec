@@ -3,11 +3,13 @@
 
 Name:           vdo
 Version:        6.2.0.298
-Release:        12
+Release:        13
 Summary:        Management tools for Virtual Data Optimizer
 License:        GPLv2
 URL:            http://github.com/dm-vdo/vdo
 Source0:        https://github.com/dm-vdo/%{name}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
+Patch0001:      0001-utils-fileUtils-Fix-null-string.patch
+Patch0002:      0002-Ignore-misaligned-pointers.patch
 
 BuildRequires:  gcc libuuid-devel device-mapper-devel device-mapper-event-devel
 BuildRequires:  valgrind-devel python3 python3-devel zlib-devel systemd
@@ -78,5 +80,8 @@ done
 %{_mandir}/man8/*
 
 %changelog
+* Fri Jun  5 2020 leiju<leiju4@huawei.com> - 6.2.0.298-13
+- Fix null string and misaligned pointers
+
 * Tue Feb 18 2019 cangyi<cangyi@huawei.com> - 6.2.0.298-12
 - Package init
