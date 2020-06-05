@@ -1,0 +1,38 @@
+From a85f6e9973697f90d11e9beb1eb16206774e4767 Mon Sep 17 00:00:00 2001
+From: "Christopher N. Hesse" <raymanfx@gmail.com>
+Date: Wed, 3 Apr 2019 22:24:29 +0200
+Subject: [PATCH 2/2] Ignore misaligned pointers
+
+Signed-off-by: Christopher N. Hesse <raymanfx@gmail.com>
+---
+ utils/vdo/base/Makefile | 1 +
+ utils/vdo/user/Makefile | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/utils/vdo/base/Makefile b/utils/vdo/base/Makefile
+index 4f2ed82..6d4c4e8 100644
+--- a/utils/vdo/base/Makefile
++++ b/utils/vdo/base/Makefile
+@@ -46,6 +46,7 @@ C_WARNS          =				\
+ 		   -Wnested-externs		\
+ 		   -Wold-style-definition	\
+ 		   -Wswitch-default		\
++		   -Wno-address-of-packed-member		\
+ 
+ OPT_FLAGS	 = -O3 -fno-omit-frame-pointer
+ DEBUG_FLAGS      =
+diff --git a/utils/vdo/user/Makefile b/utils/vdo/user/Makefile
+index b0a60d0..811dd8a 100644
+--- a/utils/vdo/user/Makefile
++++ b/utils/vdo/user/Makefile
+@@ -48,6 +48,7 @@ C_WARNS          =				\
+ 		   -Wnested-externs		\
+ 		   -Wold-style-definition	\
+ 		   -Wswitch-default		\
++		   -Wno-address-of-packed-member		\
+ 
+ OPT_FLAGS	 = -O3 -fno-omit-frame-pointer
+ DEBUG_FLAGS      =
+-- 
+2.21.0
+

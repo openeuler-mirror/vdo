@@ -1,0 +1,29 @@
+From 52f12fea424e62dc6b14aff69406eebe76bf2984 Mon Sep 17 00:00:00 2001
+From: "Christopher N. Hesse" <raymanfx@gmail.com>
+Date: Wed, 3 Apr 2019 22:23:06 +0200
+Subject: [PATCH 1/2] utils: fileUtils: Fix null string
+
+syncAndCloseFile() takes an error message string as second argument, so
+do not pass NULL.
+
+Signed-off-by: Christopher N. Hesse <raymanfx@gmail.com>
+---
+ utils/uds/fileUtils.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/utils/uds/fileUtils.c b/utils/uds/fileUtils.c
+index d3f6e70..43f1e10 100644
+--- a/utils/uds/fileUtils.c
++++ b/utils/uds/fileUtils.c
+@@ -157,7 +157,7 @@ int syncAndCloseFile(int fd, const char *errorMessage)
+ /**********************************************************************/
+ void trySyncAndCloseFile(int fd)
+ {
+-  int result = syncAndCloseFile(fd, NULL);
++  int result = syncAndCloseFile(fd, "");
+   if (result != UDS_SUCCESS) {
+     logDebugWithStringError(result, "error syncing and closing file");
+   }
+-- 
+2.21.0
+
