@@ -1,0 +1,82 @@
+--- a/utils/uds/atomicDefs.h
++++ b/utils/uds/atomicDefs.h
+@@ -96,6 +96,8 @@
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("sync" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence rw,rw" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -121,6 +123,8 @@
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("lwsync" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence r,r" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -146,6 +150,8 @@
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("lwsync" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence w,w" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -172,7 +178,7 @@
+ static INLINE void smp_read_barrier_depends(void)
+ {
+ #if defined(__x86_64__) || defined(__PPC__) || defined(__s390__) \
+-  || defined(__aarch64__)
++  || defined(__aarch64__) || defined(__riscv)
+   // Nothing needed for these architectures.
+ #else
+   // Default to playing it safe.
+--- a/utils/uds/cpu.h
++++ b/utils/uds/cpu.h
+@@ -36,7 +36,7 @@
+ #define CACHE_LINE_BYTES 128
+ #elif defined(__s390x__)
+ #define CACHE_LINE_BYTES 256
+-#elif defined(__x86_64__) || defined(__aarch64__)
++#elif defined(__x86_64__) || defined(__aarch64__) || defined(__riscv)
+ #define CACHE_LINE_BYTES  64
+ #else
+ #error "unknown cache line size"
+--- a/utils/uds/Makefile
++++ b/utils/uds/Makefile
+@@ -38,7 +38,7 @@
+ endif
+ 
+ WARNS =	-Wall			\
+-	-Wcast-align		\
++	-Wno-cast-align		\
+ 	-Werror			\
+ 	-Wextra			\
+ 	-Winit-self		\
+--- a/utils/vdo/base/Makefile
++++ b/utils/vdo/base/Makefile
+@@ -24,7 +24,7 @@
+ 
+ WARNS            =				\
+ 		   -Wall			\
+-		   -Wcast-align			\
++		   -Wno-cast-align			\
+ 		   -Werror			\
+ 		   -Wextra			\
+ 		   -Winit-self			\
+--- a/utils/vdo/user/Makefile
++++ b/utils/vdo/user/Makefile
+@@ -26,7 +26,7 @@
+ 
+ WARNS            =				\
+ 		   -Wall			\
+-		   -Wcast-align			\
++		   -Wno-cast-align			\
+ 		   -Werror			\
+ 		   -Wextra			\
+ 		   -Winit-self			\

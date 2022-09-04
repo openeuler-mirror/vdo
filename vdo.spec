@@ -1,11 +1,14 @@
 Name:           vdo
 Version:        6.2.6.14
-Release:        1
+Release:        2
 Summary:        Management tools for Virtual Data Optimizer
 License:        GPLv2
 URL:            http://github.com/dm-vdo/vdo
 Source0:	https://github.com/dm-vdo/vdo/archive/refs/tags/%{version}.tar.gz
 Patch0002:      0002-Ignore-misaligned-pointers.patch
+%ifarch riscv64
+Patch0003:	0003-RISC-V-support.patch
+%endif
 
 BuildRequires:  gcc libuuid-devel device-mapper-devel device-mapper-event-devel
 BuildRequires:  valgrind-devel python3 python3-devel zlib-devel systemd
@@ -80,6 +83,11 @@ done
 %{_mandir}/man8/*
 
 %changelog
+* Mon Aug 29 2022 YukariChiba<i@0x7f.cc> - 6.2.6.14-2
+- Add RISC-V support (Patch by YukariChiba<i@0x7f.cc>)
+- Source of fence commands: RISC-V ISA Spec from riscv.org
+- Remove -Wcast-align flag, since it causes error in RISC-V gcc
+
 * Fri May 20 2022 houyingchao <houyingchao@h-partners.com> - 6.2.6.14-1
 - Upgrade to 6.2.6.14
 
