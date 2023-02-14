@@ -3,13 +3,14 @@
 
 Name:           vdo
 Version:        6.2.0.298
-Release:        13
+Release:        14
 Summary:        Management tools for Virtual Data Optimizer
 License:        GPLv2
 URL:            http://github.com/dm-vdo/vdo
 Source0:        https://github.com/dm-vdo/%{name}/archive/%{commit}/%{name}-%{shortcommit}.tar.gz
 Patch0001:      0001-utils-fileUtils-Fix-null-string.patch
 Patch0002:      0002-Ignore-misaligned-pointers.patch
+Patch0003:	0001-vdo-6.2.0.298-add-loongarch64-support.patch
 
 BuildRequires:  gcc libuuid-devel device-mapper-devel device-mapper-event-devel
 BuildRequires:  valgrind-devel python3 python3-devel zlib-devel systemd
@@ -27,7 +28,12 @@ This package provides the user-space management tools for VDO.
 %package_help
 
 %prep
-%autosetup -n %{name}-%{commit} -p1
+%setup -n %{name}-%{commit}
+%patch -p1 -P1 
+%patch -p1 -P2
+%ifarch loongarch64
+%patch -p1 -P3
+%endif
 
 %build
 %make_build
@@ -80,6 +86,9 @@ done
 %{_mandir}/man8/*
 
 %changelog
+* Tue Feb 14 2023 Huang Yang<huangyang@loongson.cn> - 6.2.0.298-14
+- add loongarch64 support
+
 * Fri Jun  5 2020 leiju<leiju4@huawei.com> - 6.2.0.298-13
 - Fix null string and misaligned pointers
 
