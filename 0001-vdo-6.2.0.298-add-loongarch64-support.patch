@@ -1,0 +1,66 @@
+From 5671abc0df13895d2f13a4646a6ebd2af29f37ca Mon Sep 17 00:00:00 2001
+From: Huang Yang <huangyang@loongson.cn>
+Date: Tue, 14 Feb 2023 11:34:45 +0800
+Subject: [PATCH] vdo 6.2.0.298 add loongarch64 support
+
+---
+ utils/uds/atomicDefs.h | 8 +++++++-
+ utils/uds/cpu.h        | 2 +-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/utils/uds/atomicDefs.h b/utils/uds/atomicDefs.h
+index 86d6a4a..2508f40 100644
+--- a/utils/uds/atomicDefs.h
++++ b/utils/uds/atomicDefs.h
+@@ -96,6 +96,8 @@ static INLINE void smp_mb(void)
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("sync" : : : "memory");
++#elif defined __loongarch64
++  __asm__ __volatile__("dbar 0" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -121,6 +123,8 @@ static INLINE void smp_rmb(void)
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("lwsync" : : : "memory");
++#elif defined __loongarch64
++  __asm__ __volatile__("dbar 0" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -146,6 +150,8 @@ static INLINE void smp_wmb(void)
+   __asm__ __volatile__("bcr 14,0" : : : "memory");
+ #elif defined __PPC__
+   __asm__ __volatile__("lwsync" : : : "memory");
++#elif defined __loongarch64
++  __asm__ __volatile__("dbar 0" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -172,7 +178,7 @@ static INLINE void smp_mb__before_atomic(void)
+ static INLINE void smp_read_barrier_depends(void)
+ {
+ #if defined(__x86_64__) || defined(__PPC__) || defined(__s390__) \
+-  || defined(__aarch64__)
++  || defined(__aarch64__) || defined(__loongarch64)
+   // Nothing needed for these architectures.
+ #else
+   // Default to playing it safe.
+diff --git a/utils/uds/cpu.h b/utils/uds/cpu.h
+index 8b12a16..d987a1a 100644
+--- a/utils/uds/cpu.h
++++ b/utils/uds/cpu.h
+@@ -36,7 +36,7 @@
+ #define CACHE_LINE_BYTES 128
+ #elif defined(__s390x__)
+ #define CACHE_LINE_BYTES 256
+-#elif defined(__x86_64__) || defined(__aarch64__)
++#elif defined(__x86_64__) || defined(__aarch64__) || defined(__loongarch64)
+ #define CACHE_LINE_BYTES  64
+ #else
+ #error "unknown cache line size"
+-- 
+2.33.0
+
