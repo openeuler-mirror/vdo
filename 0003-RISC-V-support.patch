@@ -1,0 +1,106 @@
+diff --git a/utils/uds/atomicDefs.h b/utils/uds/atomicDefs.h
+index f468369..673f974 100644
+--- a/utils/uds/atomicDefs.h
++++ b/utils/uds/atomicDefs.h
+@@ -98,6 +98,8 @@ static INLINE void smp_mb(void)
+   __asm__ __volatile__("sync" : : : "memory");
+ #elif defined __loongarch64
+   __asm__ __volatile__("dbar 0" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence rw,rw" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -125,6 +127,8 @@ static INLINE void smp_rmb(void)
+   __asm__ __volatile__("lwsync" : : : "memory");
+ #elif defined __loongarch64
+   __asm__ __volatile__("dbar 0" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence r,r" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -152,6 +156,8 @@ static INLINE void smp_wmb(void)
+   __asm__ __volatile__("lwsync" : : : "memory");
+ #elif defined __loongarch64
+   __asm__ __volatile__("dbar 0" : : : "memory");
++#elif defined __riscv
++  __asm__ __volatile__("fence w,w" : : : "memory");
+ #else
+ #error "no fence defined"
+ #endif
+@@ -178,7 +184,7 @@ static INLINE void smp_mb__before_atomic(void)
+ static INLINE void smp_read_barrier_depends(void)
+ {
+ #if defined(__x86_64__) || defined(__PPC__) || defined(__s390__) \
+-  || defined(__aarch64__)  || defined(__loongarch64)
++  || defined(__aarch64__)  || defined(__loongarch64)  || defined(__riscv)
+   // Nothing needed for these architectures.
+ #else
+   // Default to playing it safe.
+diff --git a/utils/uds/cpu.h b/utils/uds/cpu.h
+index e26d653..f3fd61f 100644
+--- a/utils/uds/cpu.h
++++ b/utils/uds/cpu.h
+@@ -36,7 +36,7 @@
+ #define CACHE_LINE_BYTES 128
+ #elif defined(__s390x__)
+ #define CACHE_LINE_BYTES 256
+-#elif defined(__x86_64__) || defined(__aarch64__) || defined(__loongarch64)
++#elif defined(__x86_64__) || defined(__aarch64__) || defined(__loongarch64)  || defined(__riscv)
+ #define CACHE_LINE_BYTES  64
+ #else
+ #error "unknown cache line size"
+diff --git a/utils/uds/Makefile b/utils/uds/Makefile
+index e33d682..ff6ece0 100644
+--- a/utils/uds/Makefile
++++ b/utils/uds/Makefile
+@@ -32,8 +32,11 @@ ifeq ($(origin CC), default)
+   CC=gcc
+ endif
+ 
++ifeq ($(filter riscv64%,$(MAKE_HOST)),)
++Wcast-align = -Wcast-align
++endif
+ WARNS =	-Wall			\
+-	-Wcast-align		\
++	$(Wcast-align)		\
+ 	-Werror			\
+ 	-Wextra			\
+ 	-Winit-self		\
+diff --git a/utils/vdo/base/Makefile b/utils/vdo/base/Makefile
+index fb009a7..26a8e28 100644
+--- a/utils/vdo/base/Makefile
++++ b/utils/vdo/base/Makefile
+@@ -22,9 +22,12 @@ VDO_VERSION = 6.2.6.14
+ UDS_DIR      = ../../uds
+ 
+ 
++ifeq ($(filter riscv64%,$(MAKE_HOST)),)
++Wcast-align = -Wcast-align
++endif
+ WARNS            =				\
+ 		   -Wall			\
+-		   -Wcast-align			\
++		   $(Wcast-align)			\
+ 		   -Werror			\
+ 		   -Wextra			\
+ 		   -Winit-self			\
+diff --git a/utils/vdo/user/Makefile b/utils/vdo/user/Makefile
+index 8946fb3..698dede 100644
+--- a/utils/vdo/user/Makefile
++++ b/utils/vdo/user/Makefile
+@@ -24,9 +24,12 @@ VDO_VERSION = 6.2.6.14
+ UDS_DIR      = ../../uds
+ VDO_BASE_DIR = ../base
+ 
++ifeq ($(filter riscv64%,$(MAKE_HOST)),)
++Wcast-align = -Wcast-align
++endif
+ WARNS            =				\
+ 		   -Wall			\
+-		   -Wcast-align			\
++		   $(Wcast-align)			\
+ 		   -Werror			\
+ 		   -Wextra			\
+ 		   -Winit-self			\
