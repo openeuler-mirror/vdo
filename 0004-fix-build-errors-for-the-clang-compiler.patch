@@ -1,0 +1,97 @@
+--- a/utils/uds/Makefile	2023-06-19 15:02:11.285941300 +0800
++++ b/utils/uds/Makefile	2023-06-19 16:01:37.687088200 +0800
+@@ -72,6 +72,16 @@
+ MY_CFLAGS   = $(MY_FLAGS)
+ MY_LDFLAGS  =
+
++ifeq ($(CC), clang)
++NO_ERRORS = -Wno-error=unknown-warning-option \
++			-Wno-error=unused-parameter \
++			-Wno-error=cast-align \
++			-Wno-error=format-nonliteral \
++			-Wno-error=unused-but-set-variable
++else
++NO_ERRORS =
++endif
++
+ IMPORTED_SYMBOLS = libuds.imported
+
+ vpath %.c .
+@@ -175,7 +185,7 @@
+
+ %.o: %.c
+ 	@mkdir -p $(DEPDIR)/$(@D) $(@D)
+-	$(COMPILE.c) -MD -MF $(DEPDIR)/$*.d.new -MP -MT $@ $< -o $@
++	$(COMPILE.c) $(NO_ERRORS) -MD -MF $(DEPDIR)/$*.d.new -MP -MT $@ $< -o $@
+ 	if cmp -s $(DEPDIR)/$*.d $(DEPDIR)/$*.d.new; then \
+ 		rm -f $(DEPDIR)/$*.d.new ; \
+ 	else \
+
+--- a/utils/uds/cpu.h	2023-06-19 15:02:11.274753300 +0800
++++ b/utils/uds/cpu.h	2023-06-19 16:10:57.343465600 +0800
+@@ -55,7 +55,11 @@
+   // forWrite won't won't be a constant if we are compiled with optimization
+   // turned off, in which case prefetching really doesn't matter.
+   if (__builtin_constant_p(forWrite)) {
+-    __builtin_prefetch(address, forWrite);
++    #ifdef __clang__
++      #define __builtin_prefetch(x, y);
++    #else
++      __builtin_prefetch(address, forWrite);
++    #endif
+   }
+ }
+
+
+--- a/utils/vdo/base/Makefile	2023-06-19 15:02:11.302565800 +0800
++++ b/utils/vdo/base/Makefile	2023-06-19 16:12:13.037545800 +0800
+@@ -72,6 +72,14 @@
+ 	   -DCURRENT_VERSION="\"$(VDO_VERSION)\""
+ LDFLAGS  = $(GLOBAL_LDFLAGS)
+
++ifeq ($(CC), clang)
++NO_ERRORS = -Wno-error=unknown-warning-option \
++			-Wno-error=unused-parameter \
++			-Wno-error=cast-align
++else
++NO_ERRORS =
++endif
++
+ C_FILES := $(wildcard *.c)
+ OBJECTS := $(C_FILES:%.c=%.o)
+
+@@ -97,7 +105,7 @@
+ lz4.o: CFLAGS:= $(filter-out -Wcast-qual,$(CFLAGS))
+
+ %.o: %.c
+-	$(COMPILE.c) -MMD -MF $(DEPDIR)/$*.d.new -MP -MT $@ -o $@ $<
++	$(COMPILE.c) $(NO_ERRORS) -MMD -MF $(DEPDIR)/$*.d.new -MP -MT $@ -o $@ $<
+ 	if cmp -s $(DEPDIR)/$*.d $(DEPDIR)/$*.d.new ;		\
+ 	then							\
+ 		$(RM) $(DEPDIR)/$*.d.new ;			\
+
+--- a/utils/vdo/user/Makefile	2023-06-19 15:02:11.316554200 +0800
++++ b/utils/vdo/user/Makefile	2023-06-19 16:12:18.228331900 +0800
+@@ -65,6 +65,13 @@
+ GLOBAL_LDFLAGS   = $(RPM_LD_FLAGS) $(EXTRA_LDFLAGS)
+ EXTRA_LDFLAGS    =
+
++ifeq ($(CC), clang)
++NO_ERRORS = -Wno-error=unknown-warning-option \
++			-Wno-error=unused-parameter
++else
++NO_ERRORS =
++endif
++
+ DEPDIR           = .deps
+
+ MV               = mv -f
+@@ -146,7 +153,7 @@
+ # Dependency processing
+
+ %.o: %.c
+-	$(COMPILE.c) -MMD -MF $(DEPDIR)/$*.d.new -MP -MT $@ -o $@ $<
++	$(COMPILE.c) $(NO_ERRORS) -MMD -MF $(DEPDIR)/$*.d.new -MP -MT $@ -o $@ $<
+ 	if cmp -s $(DEPDIR)/$*.d $(DEPDIR)/$*.d.new ;		 \
+ 	then							 \
+ 		$(RM) $(DEPDIR)/$*.d.new ;			 \
